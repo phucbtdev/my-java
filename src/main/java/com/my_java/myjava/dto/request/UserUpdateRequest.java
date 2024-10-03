@@ -1,9 +1,6 @@
-package com.my_java.myjava.entity;
+package com.my_java.myjava.dto.request;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,19 +9,17 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
+public class UserUpdateRequest {
+
     String username;
+
+    @Size(min=5, message = "Password must be least 5  letters!")
     String password;
     String firstName;
     String lastName;
     LocalDate dob;
-
 }
