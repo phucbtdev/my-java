@@ -25,37 +25,33 @@ public class UserController {
     //Create model
     @PostMapping
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request){
-        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setData(userService.createRequest(request));
-
-        return apiResponse;
+        return ApiResponse.<UserResponse>builder()
+                .data(userService.createRequest(request))
+                .build();
     }
 
     //Update model
     @PutMapping("/{userId}")
     ApiResponse<UserResponse> updateUser(@PathVariable String userId ,@RequestBody @Valid UserUpdateRequest request){
-        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setData(userService.updateRequest(userId, request));
-
-        return apiResponse;
+        return ApiResponse.<UserResponse>builder()
+                .data(userService.updateRequest(userId, request))
+                .build();
     }
 
     //Get all list model
     @GetMapping
     ApiResponse<List<User>> getAllUser(){
-        ApiResponse<List<User>> apiResponse = new ApiResponse<>();
-        apiResponse.setData(userService.getUsers());
-
-        return apiResponse;
+        return ApiResponse.<List<User>>builder()
+                .data(userService.getUsers())
+                .build();
     }
 
     //Get one model
     @GetMapping("/{userId}")
     ApiResponse<UserResponse> getOneUser(@PathVariable String userId){
-        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
-        apiResponse.setData(userService.getUserById(userId));
-
-        return apiResponse;
+        return ApiResponse.<UserResponse>builder()
+                .data(userService.getUserById(userId))
+                .build();
     }
 
 }
