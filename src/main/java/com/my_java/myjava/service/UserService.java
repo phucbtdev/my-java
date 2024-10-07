@@ -4,6 +4,7 @@ import com.my_java.myjava.dto.request.UserCreationRequest;
 import com.my_java.myjava.dto.request.UserUpdateRequest;
 import com.my_java.myjava.dto.response.UserResponse;
 import com.my_java.myjava.entity.User;
+import com.my_java.myjava.enums.Role;
 import com.my_java.myjava.mapper.UserMapper;
 import com.my_java.myjava.repository.UserRepository;
 import lombok.AccessLevel;
@@ -12,6 +13,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     //Create
     public UserResponse createRequest(UserCreationRequest request){
@@ -28,8 +32,13 @@ public class UserService {
 
         User user = userMapper.toUser(request); // Map request -> model
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10); //Mã hóa mật khẩu
+        //Mã hóa mật khẩu
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+
+        user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user)); //Map model -> response
     }
