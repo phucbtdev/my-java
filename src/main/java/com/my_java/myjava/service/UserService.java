@@ -40,7 +40,7 @@ public class UserService {
         HashSet<String> roles = new HashSet<>();
         roles.add(Role.USER.name());
 
-        user.setRoles(roles);
+//        user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user)); //Map model -> response
     }
@@ -55,8 +55,9 @@ public class UserService {
 
     //Get list users
     @PreAuthorize("hasRole('ADMIN')")
-    public List<User> getUsers(){
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers(){
+        var user =  userRepository.findAll();
+        return user.stream().map(userMapper::toUserResponse).toList();
     }
 
     //Get by ID

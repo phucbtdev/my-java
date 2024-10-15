@@ -43,13 +43,12 @@ public class UserController {
 
     //Get all list model
     @GetMapping
-    ApiResponse<List<User>> getAllUser(){
+    ApiResponse<List<UserResponse>> getAllUser(){
         var auth = SecurityContextHolder.getContext().getAuthentication();
-        log.info(auth.getName());
         auth.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
 
-        return ApiResponse.<List<User>>builder()
-                .data(userService.getUsers())
+        return ApiResponse.<List<UserResponse>>builder()
+                .data(userService.getAllUsers())
                 .build();
     }
 
