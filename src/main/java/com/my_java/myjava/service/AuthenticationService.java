@@ -42,9 +42,11 @@ public class AuthenticationService {
     protected String SIGNER_KEY;
 
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+        //Get user by username
         var user =  userRepository.findByUsername(authenticationRequest.getUsername())
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        //Check password
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticate =  passwordEncoder.matches(authenticationRequest.getPassword(), user.getPassword());
 
@@ -52,6 +54,7 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
+        //Generate a token form user
         var token = generateToken(user);
 
         return AuthenticationResponse.builder()
@@ -60,11 +63,12 @@ public class AuthenticationService {
                 .build();
     }
 
-    //Tạo token
+    //Generate token
     public String generateToken(User user) {
-
+        //Generate header
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
+        //Generate claimSet
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
                 .issuer("phucdev.com")
@@ -75,10 +79,12 @@ public class AuthenticationService {
                 .claim("scope",buildScope(user))
                 .build();
 
+
+        //Generate payload
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 
+        //Generate jwt token
         JWSObject jwsObject = new JWSObject(header, payload);
-
 
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
@@ -89,6 +95,7 @@ public class AuthenticationService {
 
     }
 
+    //Check token
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
 
         var token = introspectRequest.getToken(); //Lấy token từ request

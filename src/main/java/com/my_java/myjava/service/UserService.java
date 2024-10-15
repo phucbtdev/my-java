@@ -10,6 +10,8 @@ import com.my_java.myjava.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,11 +54,13 @@ public class UserService {
     }
 
     //Get list users
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers(){
         return userRepository.findAll();
     }
 
     //Get by ID
+    @PostAuthorize("returnObject.username == authentication.name")
     public UserResponse getUserById(String id){
         return userMapper.toUserResponse(userRepository.findById(id).orElseThrow(()->new RuntimeException("User not found")));
     }
