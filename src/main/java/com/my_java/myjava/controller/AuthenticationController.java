@@ -3,8 +3,10 @@ package com.my_java.myjava.controller;
 import com.my_java.myjava.dto.request.ApiResponse;
 import com.my_java.myjava.dto.request.AuthenticationRequest;
 import com.my_java.myjava.dto.request.IntrospectRequest;
+import com.my_java.myjava.dto.request.LogoutRequest;
 import com.my_java.myjava.dto.response.AuthenticationResponse;
 import com.my_java.myjava.dto.response.IntrospectResponse;
+import com.my_java.myjava.entity.InvalidatedToken;
 import com.my_java.myjava.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
 import lombok.*;
@@ -41,5 +43,11 @@ public class AuthenticationController {
         return ApiResponse.<IntrospectResponse>builder()
                 .data(res)
                 .build();
+    }
+
+    @PostMapping("/logout")
+    ApiResponse<IntrospectResponse> authenticate(@RequestBody LogoutRequest logoutRequest) throws ParseException, JOSEException {
+        authenticationService.logout(logoutRequest);
+        return ApiResponse.<IntrospectResponse>builder() .build();
     }
 }

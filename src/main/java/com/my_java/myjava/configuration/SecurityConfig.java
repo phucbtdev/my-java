@@ -26,12 +26,10 @@ public class SecurityConfig {
 
     //Khai báo các endpoint public
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users","/auth/introspect","/auth/log-in"
+            "/users","/auth/introspect","/auth/log-in","/auth/logout"
     };
 
-    //Lấy signer_key từ properties
-    @Value("${jwt.signerKey}")
-    protected String SIGNER_KEY;
+    private CustomJwtDecoder customJwtDecoder;
 
     //Lọc các request phân quyền
     @Bean
@@ -45,7 +43,7 @@ public class SecurityConfig {
 
         httpSecurity.oauth2ResourceServer(
                 oauth2 -> oauth2.jwt(
-                        jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
+                        jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())).
                         authenticationEntryPoint(new JwtAuthenticationEntryPoint())
         );
@@ -65,16 +63,6 @@ public class SecurityConfig {
 
         return jwtAuthenticationConverter;
 
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
-
-        return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
     }
 
     @Bean

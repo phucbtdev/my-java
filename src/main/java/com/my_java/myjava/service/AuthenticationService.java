@@ -2,11 +2,14 @@ package com.my_java.myjava.service;
 
 import com.my_java.myjava.dto.request.AuthenticationRequest;
 import com.my_java.myjava.dto.request.IntrospectRequest;
+import com.my_java.myjava.dto.request.LogoutRequest;
 import com.my_java.myjava.dto.response.AuthenticationResponse;
 import com.my_java.myjava.dto.response.IntrospectResponse;
+import com.my_java.myjava.entity.InvalidatedToken;
 import com.my_java.myjava.entity.User;
 import com.my_java.myjava.exception.AppException;
 import com.my_java.myjava.exception.ErrorCode;
+import com.my_java.myjava.repository.InvalidatedTokenRepository;
 import com.my_java.myjava.repository.UserRepository;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -29,6 +32,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ import java.util.StringJoiner;
 public class AuthenticationService {
 
     UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -76,6 +81,7 @@ public class AuthenticationService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
                 ))
+                .jwtID(UUID.randomUUID().toString()) // tạo id cho token to logout
                 .claim("scope",buildScope(user))
                 .build();
 
@@ -99,14 +105,17 @@ public class AuthenticationService {
     public IntrospectResponse introspect(IntrospectRequest introspectRequest) throws JOSEException, ParseException {
 
         var token = introspectRequest.getToken(); //Lấy token từ request
-        SignedJWT signedJWT = SignedJWT.parse(token); //Parse token
-        Date expireTime = signedJWT.getJWTClaimsSet().getExpirationTime(); //Lấy thời gian của token
 
-        JWSVerifier jwsVerifier = new MACVerifier(SIGNER_KEY.getBytes()); // Mã hóa sign_key
-        var verified = signedJWT.verify(jwsVerifier); //Xác thực 2 signer_key
+        boolean isValid = true;
+
+        try {
+            verifyToken(token);
+        } catch (AppException e) {
+            isValid = false;
+        }
 
         return IntrospectResponse.builder()
-                .valid(verified && expireTime.after(new Date()))
+                .valid(isValid)
                 .build();
     }
 
@@ -122,5 +131,38 @@ public class AuthenticationService {
             });
 
         return stringJoiner.toString();
+    }
+
+    public void logout(LogoutRequest logoutRequest) throws ParseException, JOSEException {
+        var signToken = verifyToken(logoutRequest.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jit)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (invalidatedTokenRepository
+                .existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
     }
 }
