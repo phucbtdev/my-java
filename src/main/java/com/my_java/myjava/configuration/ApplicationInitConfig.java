@@ -37,7 +37,6 @@ public class ApplicationInitConfig {
                         .build();
 
                 userRepository.save(user);
-                log.warn("Admin user added");
             }
         };
     }
