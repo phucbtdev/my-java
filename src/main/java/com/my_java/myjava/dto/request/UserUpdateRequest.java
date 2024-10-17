@@ -1,5 +1,6 @@
 package com.my_java.myjava.dto.request;
 
+import com.my_java.myjava.validator.DobConstraint;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,8 @@ public class UserUpdateRequest {
     String password;
     String firstName;
     String lastName;
+
+    @DobConstraint(min=18,message = "INVALID_DOB")
     LocalDate dob;
 
     List<String> roles;
