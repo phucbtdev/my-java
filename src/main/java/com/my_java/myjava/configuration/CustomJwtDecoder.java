@@ -27,7 +27,8 @@ public class CustomJwtDecoder implements JwtDecoder {
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
-    public Jwt decode(String token) throws JwtException {
+    public Jwt decode(String token)
+            throws JwtException {
 
         try {
             var response = authenticationService.introspect(IntrospectRequest.builder()
