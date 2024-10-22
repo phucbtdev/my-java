@@ -13,10 +13,10 @@ import java.time.LocalDate;
 @Builder
 @FieldDefaults( level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
-
+    @Size(min = 4,message = "USERNAME_INVALID")
     String username;
 
-    @Size(min=5, message = "Password must be least 5  letters!")
+    @Size(min = 6, message = "INVALID_PASSWORD")
     String password;
     String firstName;
     String lastName;
