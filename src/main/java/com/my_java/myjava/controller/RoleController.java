@@ -1,16 +1,18 @@
 package com.my_java.myjava.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.my_java.myjava.dto.request.ApiResponse;
 import com.my_java.myjava.dto.request.RoleRequest;
 import com.my_java.myjava.dto.response.RoleResponse;
 import com.my_java.myjava.service.RoleService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -21,23 +23,23 @@ public class RoleController {
     RoleService roleService;
 
     @PostMapping
-     ApiResponse<RoleResponse> createRole(@RequestBody RoleRequest roleRequest) {
+    ApiResponse<RoleResponse> createRole(@RequestBody RoleRequest roleRequest) {
         return ApiResponse.<RoleResponse>builder()
-                .data( roleService.createRequest(roleRequest))
+                .data(roleService.createRequest(roleRequest))
                 .build();
     }
 
     @GetMapping
     ApiResponse<List<RoleResponse>> getAllRoles() {
         return ApiResponse.<List<RoleResponse>>builder()
-                .data( roleService.getAll())
+                .data(roleService.getAll())
                 .build();
     }
 
     @GetMapping("/{role}")
     ApiResponse<RoleResponse> getOne(@PathVariable("role") String role) {
         return ApiResponse.<RoleResponse>builder()
-                .data( roleService.getOne(role))
+                .data(roleService.getOne(role))
                 .build();
     }
 
@@ -45,8 +47,6 @@ public class RoleController {
     ApiResponse<Void> delete(@PathVariable("role") String role) {
         roleService.delete(role);
 
-        return ApiResponse.<Void>builder()
-                .build();
+        return ApiResponse.<Void>builder().build();
     }
-
 }

@@ -1,21 +1,24 @@
 package com.my_java.myjava.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.my_java.myjava.dto.request.ApiResponse;
-import com.my_java.myjava.exception.ErrorCode;
+import java.io.IOException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.my_java.myjava.dto.request.ApiResponse;
+import com.my_java.myjava.exception.ErrorCode;
 
-//Class để xử lý lỗi http status code 401
+// Class để xử lý lỗi http status code 401
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
+    public void commence(
+            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
         response.setStatus(errorCode.getStatusCode().value());
@@ -27,7 +30,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse)); //Map object to string
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse)); // Map object to string
         response.flushBuffer();
     }
 }
