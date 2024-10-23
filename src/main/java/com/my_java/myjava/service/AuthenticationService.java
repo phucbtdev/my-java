@@ -59,6 +59,7 @@ public class AuthenticationService {
     protected long REFRESHABLE_DURATION;
 
     public AuthenticationResponse authenticate(AuthenticationRequest authenticationRequest) {
+        log.info(SIGNER_KEY);
         // Get user by username
         var user = userRepository
                 .findByUsername(authenticationRequest.getUsername())

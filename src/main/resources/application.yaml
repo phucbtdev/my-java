@@ -1,0 +1,20 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /my-java
+
+spring:
+  datasource:
+    url: ${DBMS_URL:jdbc:mysql://localhost:3306/my-java}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DBMS_USERNAME:root}
+    password: ${DBMS_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+jwt:
+  signerKey: "+4wFlbh4CURWEIUzW9kdbx3QZs2d0p1/vzXAdNReNj7VMhCkOPDhsQXWN3GgfEge"
+  valid-duration: 3600 # in second
+  refreshable-duration: 36000 # in seconds
