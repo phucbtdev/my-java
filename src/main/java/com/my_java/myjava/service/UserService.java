@@ -3,6 +3,8 @@ package com.my_java.myjava.service;
 import java.util.HashSet;
 import java.util.List;
 
+import com.my_java.myjava.constant.PredefinedRole;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,7 +15,7 @@ import com.my_java.myjava.dto.request.UserCreationRequest;
 import com.my_java.myjava.dto.request.UserUpdateRequest;
 import com.my_java.myjava.dto.response.UserResponse;
 import com.my_java.myjava.entity.User;
-import com.my_java.myjava.enums.Role;
+import com.my_java.myjava.entity.Role;
 import com.my_java.myjava.exception.AppException;
 import com.my_java.myjava.exception.ErrorCode;
 import com.my_java.myjava.mapper.UserMapper;
@@ -34,19 +36,24 @@ public class UserService {
     RoleRepository roleRepository;
 
     public UserResponse createRequest(UserCreationRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) throw new RuntimeException("Username exist!");
+//        if (userRepository.existsByUsername(request.getUsername())) throw new RuntimeException("Username exist!");
 
         User user = userMapper.toUser(request); // Map request -> model
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // Mã hóa mật khẩu
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        HashSet<Role> roles = new HashSet<>();
+        roleRepository.findById(PredefinedRole.USER_ROLE).ifPresent(roles::add);
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(Role.USER.name());
+        user.setRoles(roles);
 
-        //        user.setRoles(roles);
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException exception){
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
 
-        return userMapper.toUserResponse(userRepository.save(user)); // Map model -> response
+        return userMapper.toUserResponse(user);
+
     }
 
     public UserResponse updateRequest(String userId, UserUpdateRequest request) {
